@@ -32,6 +32,19 @@ public class UserServices {
         String ledgerChoice = getScanner().nextLine().trim().toUpperCase();
     }
 
+    // Displays the Reports Screen
+    public static void displayReportsScreen(){
+        printSeparator("Reports Screen");
+        System.out.println("Please choose an option by typing the number:\n");
+        System.out.println("1) Month To Date");
+        System.out.println("2) Previous Month");
+        System.out.println("3) Year To Date");
+        System.out.println("4) Previous Year");
+        System.out.println("5) Search by Vendor");
+        System.out.println("0) Back");
+        pause(1000);
+    }
+
     // Exit Screen
     public static void exit() {
         printSeparator("Exiting...");
