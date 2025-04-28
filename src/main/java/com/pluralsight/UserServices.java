@@ -12,7 +12,7 @@ public class UserServices {
         printSeparator("Welcome to Accounting Ledger App");
         System.out.println("Please choose an option by typing the letter followed by a parentheses:\n");
         System.out.println("D) Add Deposit");
-        System.out.println("P) Make Payment");
+        System.out.println("P) Make Payment(Debit)");
         System.out.println("L) View Ledger");
         System.out.println("X) Exit");
         System.out.print("Enter your choice:");
@@ -28,12 +28,10 @@ public class UserServices {
         System.out.println("R) Reports");
         System.out.println("H) Home");
         System.out.print("Enter your choice:");
-
-        String ledgerChoice = getScanner().nextLine().trim().toUpperCase();
     }
 
     // Displays the Reports Screen
-    public static void displayReportsScreen(){
+    public static void displayReportsScreen() {
         printSeparator("Reports Screen");
         System.out.println("Please choose an option by typing the number:\n");
         System.out.println("1) Month To Date");
@@ -83,9 +81,26 @@ public class UserServices {
 
     // Displays a message and returns the user's input as a double.
     public static double questionDouble(String message) {
-        System.out.println(message);
-        double value = myScanner.nextDouble();
-        myScanner.nextLine();
-        return value;
+        while (true) try {
+            System.out.println(message);
+            double value = myScanner.nextDouble();
+            myScanner.nextLine();
+            return value;
+        } catch (Exception e) {
+            System.out.println("Invalid input. Please enter a valid number");
+            myScanner.nextLine();
+        }
+
+
+    }
+
+    //validate required string inputs
+    public static boolean inputValidator(String userInput) {
+        return userInput == null || userInput.trim().isEmpty();
+    }
+
+    //Validate required double amount
+    public static boolean isZero(double amount) {
+        return amount == 0;
     }
 }
