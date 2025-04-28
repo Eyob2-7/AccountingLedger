@@ -19,7 +19,7 @@ public class UserServices {
     }
 
     // Displays the Ledger Screen menu
-    public static void ledgerScreen() {
+    public static void DisplayLedgerScreen() {
         printSeparator("Ledger Screen");
         System.out.println("Please choose an option by typing the letter followed by a parentheses:\n");
         System.out.println("A) All");
@@ -73,5 +73,19 @@ public class UserServices {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    // Displays a message and returns the user's input as a trimmed String.
+    public static String question(String message) {
+        System.out.println(message);
+        return myScanner.nextLine().trim();
+    }
+
+    // Displays a message and returns the user's input as a double.
+    public static double questionDouble(String message) {
+        System.out.println(message);
+        double value = myScanner.nextDouble();
+        myScanner.nextLine();
+        return value;
     }
 }
