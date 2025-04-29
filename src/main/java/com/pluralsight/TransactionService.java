@@ -129,14 +129,38 @@ public class TransactionService {
                             System.out.println(t);
                         }
                     }
-                    break;
                 } catch (Exception e) {
                     System.out.println("Error reading transactions: ");
-
                 }
+                break;
 
             case "D":
                 System.out.println("Showing Only Deposits...");
+                ArrayList<Transaction> deposits = new ArrayList<>();
+                try (BufferedReader reader = getFileReader(myFile)) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        if (line.startsWith("date")) {
+                            continue;
+                        }
+                        String[] parts = line.split("\\|");
+                        String date = parts[0].trim();
+                        String time = parts[1].trim();
+                        String description = parts[2].trim();
+                        String vendor = parts[3].trim();
+                        double amount = Double.parseDouble(parts[4].trim());
+
+                        if (amount > 0) {
+                            deposits.add((new Transaction(date, time, description, vendor, amount)));
+                        }
+                    }
+                    Collections.reverse(deposits);
+                    for (Transaction t : deposits) {
+                        System.out.println(t);
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error reading deposits:" + e.getMessage());
+                }
                 break;
             case "P":
                 System.out.println("Showing only Payments...");
