@@ -3,10 +3,13 @@ package com.pluralsight;
 import java.io.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 
 public class TransactionService {
+
+    // Create a static File object representing the transactions CSV file
+    public static String myFile = "src/main/resources/transactions.csv";
 
     // Handles user input for adding a deposit and saves as a positive amount to the CSV file
     public static String addDeposit() {
@@ -39,7 +42,7 @@ public class TransactionService {
             return "Deposit failed: please enter amount";
         }
 
-        String dateStamp = getCurrentDateStamp();
+        LocalDate dateStamp = getCurrentDateStamp();
         String timeStamp = getCurrentTimeStamp();
 
         // Create a new Transaction object
@@ -82,7 +85,7 @@ public class TransactionService {
             return "Deposit failed: please enter amount";
         }
 
-        String dateStamp = getCurrentDateStamp();
+        LocalDate dateStamp = getCurrentDateStamp();
         String timeStamp = getCurrentTimeStamp();
 
         // Create a new transaction object
@@ -99,113 +102,117 @@ public class TransactionService {
     }
 
     // Displays the full ledger by reading all transactions from the CSV file
-    public static String displayLedger() {
-        System.out.println("\nLedger...");
-        UserServices.DisplayLedgerScreen();
-        String choice = UserServices.getScanner().nextLine().trim().toUpperCase();
+    public static void displayLedger() {
+        boolean inLedger = true;
+        while (inLedger) {
+            System.out.println("\nLedger...");
+            UserServices.DisplayLedgerScreen();
+            String choice = UserServices.getScanner().nextLine().trim().toUpperCase();
 
-        switch (choice) {
-            case "A":
-                System.out.println("Showing All Transactions...");
-                ArrayList<Transaction> transactions = new ArrayList<>();
-                try (BufferedReader reader = getFileReader(myFile)) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        if (line.startsWith("date")) {
-                            continue;
+            switch (choice) {
+                case "A":
+                    System.out.println("Showing All Transactions...");
+                    ArrayList<Transaction> transactions = new ArrayList<>();
+                    try (BufferedReader reader = getFileReader(myFile)) {
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            if (line.startsWith("date")) {
+                                continue;
+                            }
+
+                            String[] parts = line.split("\\|");
+                            if (parts.length < 5) continue;
+                            LocalDate date = LocalDate.parse(parts[0].trim(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                            String time = parts[1].trim();
+                            String description = parts[2].trim();
+                            String vendor = parts[3].trim();
+                            double amount = Double.parseDouble(parts[4].trim());
+                            transactions.add(new Transaction(date, time, description, vendor, amount));
+
+                            transactions.sort(Transaction.sortByNewestDateTime());
+
                         }
-
-                        String[] parts = line.split("\\|");
-                        if (parts.length < 5) continue;
-                        String date = parts[0].trim();
-                        String time = parts[1].trim();
-                        String description = parts[2].trim();
-                        String vendor = parts[3].trim();
-                        double amount = Double.parseDouble(parts[4].trim());
-                        transactions.add(new Transaction(date, time, description, vendor, amount));
-
-                        Collections.reverse(transactions);
                         for (Transaction t : transactions) {
                             System.out.println(t);
                         }
+                    } catch (Exception e) {
+                        System.out.println("Error reading transactions: " + e.getMessage());
                     }
-                } catch (Exception e) {
-                    System.out.println("Error reading transactions: ");
-                }
-                break;
+                    break;
 
-            case "D":
-                System.out.println("Showing Only Deposits...");
-                ArrayList<Transaction> deposits = new ArrayList<>();
-                try (BufferedReader reader = getFileReader(myFile)) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        if (line.startsWith("date")) {
-                            continue;
-                        }
-                        String[] parts = line.split("\\|");
-                        String date = parts[0].trim();
-                        String time = parts[1].trim();
-                        String description = parts[2].trim();
-                        String vendor = parts[3].trim();
-                        double amount = Double.parseDouble(parts[4].trim());
+                case "D":
+                    System.out.println("Showing Only Deposits...");
+                    ArrayList<Transaction> deposits = new ArrayList<>();
+                    try (BufferedReader reader = getFileReader(myFile)) {
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            if (line.startsWith("date")) {
+                                continue;
+                            }
+                            String[] parts = line.split("\\|");
+                            LocalDate date = LocalDate.parse(parts[0].trim(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                            String time = parts[1].trim();
+                            String description = parts[2].trim();
+                            String vendor = parts[3].trim();
+                            double amount = Double.parseDouble(parts[4].trim());
 
-                        if (amount > 0) {
-                            deposits.add((new Transaction(date, time, description, vendor, amount)));
+                            if (amount > 0) {
+                                deposits.add((new Transaction(date, time, description, vendor, amount)));
+                            }
                         }
-                    }
-                    Collections.reverse(deposits);
-                    for (Transaction t : deposits) {
-                        System.out.println(t);
-                    }
-                } catch (Exception e) {
-                    System.out.println("Error reading deposits:" + e.getMessage());
-                }
-                break;
-            case "P":
-                System.out.println("Showing only Payments...");
-                ArrayList<Transaction> payments = new ArrayList<>();
-                try (BufferedReader reader = getFileReader(myFile)) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        if (line.startsWith("date")) {
-                            continue;
+                        deposits.sort(Transaction.sortByNewestDateTime());
+                        for (Transaction t : deposits) {
+                            System.out.println(t);
                         }
-                        String[] parts = line.split("\\|");
-                        String date = parts[0].trim();
-                        String time = parts[1].trim();
-                        String description = parts[2].trim();
-                        String vendor = parts[3].trim();
-                        double amount = Double.parseDouble(parts[4].trim());
+                    } catch (Exception e) {
+                        System.out.println("Error reading deposits:" + e.getMessage());
+                    }
+                    break;
+                case "P":
+                    System.out.println("Showing only Payments...");
+                    ArrayList<Transaction> payments = new ArrayList<>();
+                    try (BufferedReader reader = getFileReader(myFile)) {
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            if (line.startsWith("date")) {
+                                continue;
+                            }
+                            String[] parts = line.split("\\|");
+                            LocalDate date = LocalDate.parse(parts[0].trim(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                            String time = parts[1].trim();
+                            String description = parts[2].trim();
+                            String vendor = parts[3].trim();
+                            double amount = Double.parseDouble(parts[4].trim());
 
-                        if (amount < 0) {
-                            payments.add((new Transaction(date, time, description, vendor, amount)));
+                            if (amount < 0) {
+                                payments.add((new Transaction(date, time, description, vendor, amount)));
+                            }
                         }
+                        payments.sort(Transaction.sortByNewestDateTime());
+                        for (Transaction t : payments) {
+                            System.out.println(t);
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Error reading payments:" + e.getMessage());
                     }
-                    Collections.reverse(payments);
-                    for (Transaction t : payments) {
-                        System.out.println(t);
-                    }
-                } catch (Exception e) {
-                    System.out.println("Error reading payments:" + e.getMessage());
-                }
-                break;
-            case "R":
-                System.out.println("Showing Reports Screen...");
-                break;
-            case "H":
-                System.out.println("Returning to Ledger...");
-                break;
-            default:
-                System.out.println("Invalid option. Please try again.");
-                break;
+                    break;
+                case "R":
+                    System.out.println("Showing Reports Screen...");
+                    break;
+                case "H":
+                    System.out.println("Returning to Home Screen...");
+                    inLedger = false;
+                    break;
+                default:
+                    System.out.println("Invalid option. Please try again.");
+                    break;
+            }
         }
-        return "success";
     }
 
     //Returns the current date as a formatted string (yyyy-MM-dd)
-    public static String getCurrentDateStamp() {
-        return LocalDate.now().toString();
+    public static LocalDate getCurrentDateStamp() {
+        return LocalDate.now();
     }
 
     //Returns the current time as a formatted string (HH:mm:ss) without nanoseconds
@@ -222,7 +229,4 @@ public class TransactionService {
             throw new RuntimeException(e);
         }
     }
-
-    // Create a static File object representing the transactions CSV file
-    public static String myFile = "src/main/resources/transactions.csv";
 }

@@ -24,20 +24,18 @@ public class AccountingLedgerApp {
                     UserServices.pause(1000);
                     break;
                 case "P":
-                    UserServices.printSeparator("Making Payment...");
+                    String paymentMessage = TransactionService.makePayment();
+                    System.out.println(paymentMessage);
                     UserServices.pause(1000);
-
                     break;
                 case "L":
-                    UserServices.DisplayLedgerScreen();
+                   TransactionService.displayLedger();
                     UserServices.pause(1000);
                     break;
                 case "X":
                     UserServices.exit();
                     isRunning = false;
                     break;
-                default:
-                    UserServices.printSeparator("Invalid choice. Please try again");
             }
         }
     }

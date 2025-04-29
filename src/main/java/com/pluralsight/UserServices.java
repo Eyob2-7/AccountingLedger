@@ -10,7 +10,7 @@ public class UserServices {
     // Displays the Home Screen menu
     public static void displayHomeScreen() {
         printSeparator("Welcome to Accounting Ledger App");
-        System.out.println("Please choose an option by typing the letter followed by a parentheses:\n");
+        System.out.println("Please choose an option by typing a letter:\n");
         System.out.println("D) Add Deposit");
         System.out.println("P) Make Payment(Debit)");
         System.out.println("L) View Ledger");
@@ -21,7 +21,7 @@ public class UserServices {
     // Displays the Ledger Screen menu
     public static void DisplayLedgerScreen() {
         printSeparator("Ledger Screen");
-        System.out.println("Please choose an option by typing the letter followed by a parentheses:\n");
+        System.out.println("Please choose an option by typing a letter:\n");
         System.out.println("A) All");
         System.out.println("D) Deposits");
         System.out.println("P) Payments");
@@ -40,7 +40,6 @@ public class UserServices {
         System.out.println("4) Previous Year");
         System.out.println("5) Search by Vendor");
         System.out.println("0) Back");
-        pause(1000);
     }
 
     // Exit Screen
