@@ -164,12 +164,37 @@ public class TransactionService {
                 break;
             case "P":
                 System.out.println("Showing only Payments...");
+                ArrayList<Transaction> payments = new ArrayList<>();
+                try (BufferedReader reader = getFileReader(myFile)) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        if (line.startsWith("date")) {
+                            continue;
+                        }
+                        String[] parts = line.split("\\|");
+                        String date = parts[0].trim();
+                        String time = parts[1].trim();
+                        String description = parts[2].trim();
+                        String vendor = parts[3].trim();
+                        double amount = Double.parseDouble(parts[4].trim());
+
+                        if (amount < 0) {
+                            payments.add((new Transaction(date, time, description, vendor, amount)));
+                        }
+                    }
+                    Collections.reverse(payments);
+                    for (Transaction t : payments) {
+                        System.out.println(t);
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error reading payments:" + e.getMessage());
+                }
                 break;
             case "R":
                 System.out.println("Showing Reports Screen...");
                 break;
             case "H":
-                System.out.println("Returning Home...");
+                System.out.println("Returning to Ledger...");
                 break;
             default:
                 System.out.println("Invalid option. Please try again.");
