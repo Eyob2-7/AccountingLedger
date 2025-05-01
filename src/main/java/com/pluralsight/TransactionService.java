@@ -1,9 +1,13 @@
 package com.pluralsight;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class TransactionService {
 
@@ -77,6 +81,7 @@ public class TransactionService {
 
         double amount = UserServices.questionDouble("Enter amount:");
         amount = -Math.abs(amount);//force negative for debit
+
         if (UserServices.isZero(amount)) {
             System.out.println("Amount can not be empty!");
             return "Payment failed: please enter amount";
@@ -110,7 +115,6 @@ public class TransactionService {
                 case "A":
                     showAllTransactions(allTransactions);
                     break;
-
                 case "D":
                     showOnlyDeposits(allTransactions);
                     break;
@@ -139,6 +143,9 @@ public class TransactionService {
                                 break;
                             case 5:
                                 searchByVendorReport(allTransactions);
+                                break;
+                            case 6:
+                                getCustomSearch(allTransactions);
                                 break;
                             case 0:
                                 System.out.println("Returning to Ledger Screen...");
@@ -333,6 +340,43 @@ public class TransactionService {
             for (Transaction t : vendorMatches) {
                 System.out.println(t);
             }
+        }
+    }
+
+    // Searches by amount
+    public static void getCustomSearch(ArrayList<Transaction> allTransactions) {
+        boolean inCustom = true;
+        while (inCustom) {
+            UserServices.displayCustomSearchScreen();
+            int option = UserServices.getScanner().nextInt();
+            UserServices.getScanner().nextLine();
+            ArrayList<Transaction> sortedAmount = new ArrayList<>(allTransactions);
+            switch (option) {
+                case 1: // Sort Low to High
+                    sortedAmount.sort(Comparator.comparingDouble(Transaction::getAmount));
+                    System.out.println("Sorted by Amount(Low to High)");
+                    for (int i = 0; i < sortedAmount.size(); i++) {
+                        System.out.println(sortedAmount.get(i));
+                    }
+                    Utility.pause(1000);
+                    break;
+                case 2: // Sort High to Low
+                    sortedAmount.sort(Comparator.comparingDouble(Transaction::getAmount).reversed());
+                    System.out.println("Sorted by Amount (High to Low)");
+                    for (int i = 0; i < sortedAmount.size(); i++) {
+                        System.out.println(sortedAmount.get(i));
+                    }
+                    Utility.pause(1000);
+                    break;
+                case 3:
+                    System.out.println("Returning to Report Menu...");
+                    inCustom = false;
+                    Utility.pause(1000);
+                    break;
+                default:
+                    System.out.println("Invalid option. Please choose 1, 2, or 3.");
+            }
+
         }
     }
 }

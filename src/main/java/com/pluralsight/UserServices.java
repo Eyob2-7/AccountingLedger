@@ -4,6 +4,7 @@ import java.util.Scanner;
 
 // This class provides utility methods for user interactions
 public class UserServices {
+
     // Fire up the scanner for user input
     static Scanner myScanner = new Scanner(System.in);
 
@@ -39,7 +40,16 @@ public class UserServices {
         System.out.println("3) Year To Date");
         System.out.println("4) Previous Year");
         System.out.println("5) Search by Vendor");
+        System.out.println("6) Search by Amount");
         System.out.println("0) Back");
+    }
+
+    // Displays custom search by amount
+    public static void displayCustomSearchScreen() {
+        printSeparator("Custom Search Options");
+        System.out.println("1. Sort by Amount(Low to High)");
+        System.out.println("2. Sort by Amount(High to Low)");
+        System.out.println("3. Back to Report Menu");
     }
 
     // Exit Screen

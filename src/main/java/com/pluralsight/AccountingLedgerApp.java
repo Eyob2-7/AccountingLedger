@@ -4,10 +4,10 @@ public class AccountingLedgerApp {
 
     public static void main(String[] args) {
 
-// Control variable to keep the application running
+        // Control variable to keep the application running
         boolean isRunning = true;
 
-// Main loop
+        // Main loop
         while (isRunning) {
 
             // Displays the home screen
@@ -29,7 +29,7 @@ public class AccountingLedgerApp {
                     Utility.pause(1000);
                     break;
                 case "L":
-                   TransactionService.displayLedger();
+                    TransactionService.displayLedger();
                     Utility.pause(1000);
                     break;
                 case "X":
