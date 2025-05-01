@@ -21,28 +21,6 @@ public class Transaction {
         this.amount = amount;
     }
 
-    // Provides a comparator to sort transactions by date and time, newest first
-    public static Comparator<Transaction> sortByNewestDateTime() {
-        return new Comparator<Transaction>() {
-
-            // Override the compare method to define custom sorting logic
-            @Override
-            public int compare(Transaction t1, Transaction t2) {
-                // Define the format of date and time used in the CSV file
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-                // Combine and parse the first transaction's date and time into LocalDateTime
-                LocalDateTime dt1 = LocalDateTime.parse(t1.getDate() + " " + t1.getTime(), formatter);
-
-                // Combine and parse the second transaction's date and time into LocalDateTime
-                LocalDateTime dt2 = LocalDateTime.parse(t2.getDate() + " " + t2.getTime(), formatter);
-
-                // Compare dt2 to dt1 so the most recent transaction appears first
-                return dt2.compareTo(dt1);
-            }
-        };
-    }
-
     public LocalDate getDate() {
         return date;
     }
@@ -87,4 +65,25 @@ public class Transaction {
         return date + "|" + time + "|" + description + "|" + vendor + "|" + amount;
     }
 
+//     Provides a comparator to sort transactions by date and time, newest first
+    public static Comparator<Transaction> sortByNewestDateTime() {
+        return new Comparator<Transaction>() {
+
+            // Override the compare method to define custom sorting logic
+            @Override
+            public int compare(Transaction t1, Transaction t2) {
+                // Define the format of date and time used in the CSV file
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+                // Combine and parse the first transaction's date and time into LocalDateTime
+                LocalDateTime dt1 = LocalDateTime.parse(t1.getDate() + " " + t1.getTime(), formatter);
+
+                // Combine and parse the second transaction's date and time into LocalDateTime
+                LocalDateTime dt2 = LocalDateTime.parse(t2.getDate() + " " + t2.getTime(), formatter);
+
+                // Compare dt2 to dt1 so the most recent transaction appears first
+                return dt2.compareTo(dt1);
+            }
+        };
+    }
 }

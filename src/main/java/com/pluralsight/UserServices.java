@@ -45,7 +45,7 @@ public class UserServices {
     // Exit Screen
     public static void exit() {
         printSeparator("Exiting...");
-        UserServices.pause(1000);
+        Utility.pause(1000);
         System.out.println("Thank you for using the Accounting Ledger App. Goodbye");
 
     }
@@ -61,15 +61,6 @@ public class UserServices {
     // Returns the static Scanner object
     public static Scanner getScanner() {
         return myScanner;
-    }
-
-    // Pause the program for a given number of milliseconds
-    public static void pause(int milliseconds) {
-        try {
-            Thread.sleep(milliseconds);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     // Displays a message and returns the user's input as a trimmed String.
@@ -89,16 +80,9 @@ public class UserServices {
             System.out.println("Invalid input. Please enter a valid number");
             myScanner.nextLine();
         }
-
-
     }
 
-    //validate required string inputs
-    public static boolean inputValidator(String userInput) {
-        return userInput == null || userInput.trim().isEmpty();
-    }
-
-    //Validate required double amount
+    // Validate required double amount
     public static boolean isZero(double amount) {
         return amount == 0;
     }

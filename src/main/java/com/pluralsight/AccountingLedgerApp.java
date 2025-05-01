@@ -21,16 +21,16 @@ public class AccountingLedgerApp {
                 case "D":
                     String statusMessage = TransactionService.addDeposit();
                     System.out.println(statusMessage);
-                    UserServices.pause(1000);
+                    Utility.pause(1000);
                     break;
                 case "P":
                     String paymentMessage = TransactionService.makePayment();
                     System.out.println(paymentMessage);
-                    UserServices.pause(1000);
+                    Utility.pause(1000);
                     break;
                 case "L":
                    TransactionService.displayLedger();
-                    UserServices.pause(1000);
+                    Utility.pause(1000);
                     break;
                 case "X":
                     UserServices.exit();

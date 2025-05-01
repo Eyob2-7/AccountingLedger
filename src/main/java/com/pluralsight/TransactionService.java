@@ -2,16 +2,16 @@ package com.pluralsight;
 
 import java.io.*;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class TransactionService {
 
-    // Create a static File object representing the transactions CSV file
+    // File path for storing transactions
     public static String myFile = "src/main/resources/transactions.csv";
+    public static int currentYear = Utility.getCurrentDateStamp().getYear();
 
-    // Handles user input for adding a deposit and saves as a positive amount to the CSV file
+    // Adds a deposit and saves to CSV
     public static String addDeposit() {
 
         // Print this before asking user the inputs
@@ -22,14 +22,14 @@ public class TransactionService {
 
         // Ask user for deposit information
         String description = UserServices.question("Enter description:");
-        if (UserServices.inputValidator(description)) {
+        if (Utility.inputValidator(description)) {
             System.out.println("Description can not be empty!");
             return "Deposit failed: description was empty";
         }
 
         // Ask user for vendor information
         String vendor = UserServices.question("Enter vendor:");
-        if (UserServices.inputValidator(vendor)) {
+        if (Utility.inputValidator(vendor)) {
             System.out.println("Vendor can not be empty!");
             return "Deposit failed: vendor was empty";
         }
@@ -42,23 +42,20 @@ public class TransactionService {
             return "Deposit failed: please enter amount";
         }
 
-        LocalDate dateStamp = getCurrentDateStamp();
-        String timeStamp = getCurrentTimeStamp();
-
         // Create a new Transaction object
-        Transaction deposit = new Transaction(dateStamp, timeStamp, description, vendor, amount);
+        Transaction deposit = new Transaction(Utility.getCurrentDateStamp(), Utility.getCurrentTimeStamp(), description, vendor, amount);
 
         // Write the deposit to the file
         try (BufferedWriter myWriter = new BufferedWriter(new FileWriter(myFile, true))) {
             myWriter.write(deposit.toString());
             myWriter.newLine();
-            return "\nDeposit saved successfully!\n";
+            return "\nDeposit saved\n";
         } catch (IOException e) {
             return "Error saving deposit: " + e.getMessage();
         }
     }
 
-    // Handles user input for making a payment and saves as a negative amount to the CSV file
+    // Adds a payment and saves to CSV
     public static String makePayment() {
 
         System.out.println("\nMake Payment (Debit)...");
@@ -66,15 +63,15 @@ public class TransactionService {
 
         // Ask for user input
         String description = UserServices.question("Enter description:");
-        if (UserServices.inputValidator(description)) {
+        if (Utility.inputValidator(description)) {
             System.out.println("Description can not be empty!");
-            return "Deposit failed: description was empty";
+            return "Payment failed: description was empty";
         }
 
         String vendor = UserServices.question("Enter vendor:");
-        if (UserServices.inputValidator(vendor)) {
+        if (Utility.inputValidator(vendor)) {
             System.out.println("Vendor can not be empty!");
-            return "Deposit failed: vendor was empty";
+            return "Payment failed: vendor was empty";
         }
 
 
@@ -82,26 +79,23 @@ public class TransactionService {
         amount = -Math.abs(amount);//force negative for debit
         if (UserServices.isZero(amount)) {
             System.out.println("Amount can not be empty!");
-            return "Deposit failed: please enter amount";
+            return "Payment failed: please enter amount";
         }
 
-        LocalDate dateStamp = getCurrentDateStamp();
-        String timeStamp = getCurrentTimeStamp();
-
         // Create a new transaction object
-        Transaction payment = new Transaction(dateStamp, timeStamp, description, vendor, amount);
+        Transaction payment = new Transaction(Utility.getCurrentDateStamp(), Utility.getCurrentTimeStamp(), description, vendor, amount);
 
         // Save to CSV file
         try (BufferedWriter myWriter = new BufferedWriter(new FileWriter(myFile, true))) {
             myWriter.write(payment.toString());
             myWriter.newLine();
-            return "\nPayment saved successfully!\n";
+            return "\nPayment saved\n";
         } catch (IOException e) {
             return "Error saving payment: " + e.getMessage();
         }
     }
 
-    // Displays the full ledger by reading all transactions from the CSV file
+    // Displays the main Ledger screen and handles user menu options
     public static void displayLedger() {
         boolean inLedger = true;
         while (inLedger) {
@@ -109,58 +103,49 @@ public class TransactionService {
             UserServices.DisplayLedgerScreen();
             String choice = UserServices.getScanner().nextLine().trim().toUpperCase();
 
+            // Read all transactions from file
             ArrayList<Transaction> allTransactions = TransactionService.readTransactions(myFile);
 
             switch (choice) {
                 case "A":
-                    System.out.println("Showing All Transactions...");
-                    if (allTransactions.isEmpty()) {
-                        System.out.println("No transactions found.");
-                    } else {
-                        for (Transaction t : allTransactions) {
-                            System.out.println(t);
-                        }
-                    }
+                    showAllTransactions(allTransactions);
                     break;
 
                 case "D":
-                    System.out.println("Showing Only Deposits...");
-                    ArrayList<Transaction> deposits = new ArrayList<>();
-
-                    for (Transaction t : allTransactions) {
-                        if (t.getAmount() > 0) {
-                            deposits.add(t);
-                        }
-                    }
-                    if (deposits.isEmpty()) {
-                        System.out.println("No deposit transactions found.");
-                    } else {
-                        for (Transaction d : deposits) {
-                            System.out.println(d);
-                        }
-                    }
+                    showOnlyDeposits(allTransactions);
                     break;
                 case "P":
-                    System.out.println("Showing only Payments...");
-                    ArrayList<Transaction> payments = new ArrayList<>();
-                    for (Transaction t : allTransactions) {
-                        if (t.getAmount() < 0) {
-                            payments.add(t);
-                        }
-                    }
-                    if (payments.isEmpty()) {
-                        System.out.println("No payment transactions found.");
-                    } else {
-                        for (Transaction p : payments) {
-                            System.out.println(p);
-                        }
-                    }
+                    showOnlyPayments(allTransactions);
                     break;
                 case "R":
-                    System.out.println("Reports Screen...");
-                    UserServices.displayReportsScreen();
-                    int reportChoice = UserServices.getScanner().nextInt();
-                    UserServices.getScanner().nextLine();
+                    boolean inReports = true;
+                    while (inReports) {
+                        System.out.println("Reports Screen...");
+                        UserServices.displayReportsScreen();
+                        int reportChoice = UserServices.getScanner().nextInt();
+                        UserServices.getScanner().nextLine();
+                        switch (reportChoice) {
+                            case 1:
+                                monthToDateReport(allTransactions);
+                                break;
+                            case 2:
+                                previousMonthReport(allTransactions);
+                                break;
+                            case 3:
+                                yearToDateReport(allTransactions);
+                                break;
+                            case 4:
+                                previousYearReport(allTransactions);
+                                break;
+                            case 5:
+                                searchByVendorReport(allTransactions);
+                                break;
+                            case 0:
+                                System.out.println("Returning to Ledger Screen...");
+                                inReports = false;
+                                break;
+                        }
+                    }
                     break;
                 case "H":
                     System.out.println("Returning to Home Screen...");
@@ -173,29 +158,10 @@ public class TransactionService {
         }
     }
 
-    //Returns the current date as a formatted string (yyyy-MM-dd)
-    public static LocalDate getCurrentDateStamp() {
-        return LocalDate.now();
-    }
-
-    //Returns the current time as a formatted string (HH:mm:ss) without nanoseconds
-    public static String getCurrentTimeStamp() {
-        return LocalTime.now().withNano(0).toString();
-    }
-
-    //method to get a file reader by passing in the file name for a file in src/main/resources
-    public static BufferedReader getFileReader(String fileName) {
-        try {
-            FileReader reader = new FileReader(fileName);
-            return new BufferedReader(reader);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
+    // Read all transactions from the CSV
     public static ArrayList<Transaction> readTransactions(String fileName) {
         ArrayList<Transaction> transactions = new ArrayList<>();
-        try (BufferedReader reader = getFileReader(myFile)) {
+        try (BufferedReader reader = Utility.getFileReader(myFile)) {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (line.startsWith("date")) {
@@ -209,11 +175,164 @@ public class TransactionService {
                 double amount = Double.parseDouble(parts[4].trim());
                 transactions.add((new Transaction(date, time, description, vendor, amount)));
             }
+            // Sort transactions after reading
             transactions.sort(Transaction.sortByNewestDateTime());
 
         } catch (Exception e) {
             System.out.println("Error reading payments:" + e.getMessage());
         }
         return transactions;
+    }
+
+    // Show all transactions
+    public static void showAllTransactions(ArrayList<Transaction> allTransactions) {
+        System.out.println("Showing All Transactions...");
+        if (allTransactions.isEmpty()) {
+            System.out.println("No transactions found.");
+        } else {
+            for (Transaction t : allTransactions) {
+                System.out.println(t);
+            }
+        }
+    }
+
+    // Show only deposits
+    public static void showOnlyDeposits(ArrayList<Transaction> allTransactions) {
+        System.out.println("Showing Only Deposits...");
+        ArrayList<Transaction> deposits = new ArrayList<>();
+
+        for (Transaction t : allTransactions) {
+            if (t.getAmount() > 0) {
+                deposits.add(t);
+            }
+        }
+        if (deposits.isEmpty()) {
+            System.out.println("No deposit transactions found.");
+        } else {
+            for (Transaction d : deposits) {
+                System.out.println(d);
+            }
+        }
+    }
+
+    // Show only payments
+    public static void showOnlyPayments(ArrayList<Transaction> allTransactions) {
+        System.out.println("Showing only Payments...");
+        ArrayList<Transaction> payments = new ArrayList<>();
+        for (Transaction t : allTransactions) {
+            if (t.getAmount() < 0) {
+                payments.add(t);
+            }
+        }
+        if (payments.isEmpty()) {
+            System.out.println("No payment transactions found.");
+        } else {
+            for (Transaction p : payments) {
+                System.out.println(p);
+            }
+        }
+    }
+
+    // Displays current month report
+    public static void monthToDateReport(ArrayList<Transaction> allTransactions) {
+        UserServices.printSeparator("Month-To-Date-Report");
+        int currentMonth = Utility.getCurrentDateStamp().getMonthValue();
+        ArrayList<Transaction> monthToDate = new ArrayList<>();
+        for (Transaction t : allTransactions) {
+            if (t.getDate().getMonthValue() == currentMonth && t.getDate().getYear() == currentYear) {
+                monthToDate.add(t);
+            }
+        }
+        if (monthToDate.isEmpty()) {
+            System.out.println("No transactions found for this month.");
+        } else {
+            for (Transaction t : monthToDate) {
+                System.out.println(t);
+            }
+        }
+    }
+
+    // Displays previous month report
+    public static void previousMonthReport(ArrayList<Transaction> allTransactions) {
+        UserServices.printSeparator("Previous Month Report");
+        LocalDate previousMonthDate = Utility.getCurrentDateStamp().minusMonths(1);
+        int prevMonth = previousMonthDate.getMonthValue();
+        int prevYear = previousMonthDate.getYear();
+
+        ArrayList<Transaction> previousMonth = new ArrayList<>();
+
+        for (Transaction t : allTransactions) {
+            LocalDate tDate = t.getDate();
+            if (tDate.getMonthValue() == prevMonth && tDate.getYear() == prevYear) {
+                previousMonth.add(t);
+            }
+        }
+
+        if (previousMonth.isEmpty()) {
+            System.out.println("No transactions found for the previous month.");
+        } else {
+            for (Transaction t : previousMonth) {
+                System.out.println(t);
+            }
+        }
+    }
+
+    // Displays current calendar year report
+    public static void yearToDateReport(ArrayList<Transaction> allTransactions) {
+        UserServices.printSeparator("Year-To-Date Report");
+        ArrayList<Transaction> yearToDate = new ArrayList<>();
+
+        for (Transaction t : allTransactions) {
+            if (t.getDate().getYear() == currentYear) {
+                yearToDate.add(t);
+            }
+        }
+
+        if (yearToDate.isEmpty()) {
+            System.out.println("No transactions found for this year.");
+        } else {
+            for (Transaction t : yearToDate) {
+                System.out.println(t);
+            }
+        }
+    }
+
+    // Displays previous calendar year report
+    public static void previousYearReport(ArrayList<Transaction> allTransactions) {
+        UserServices.printSeparator("Previous Year Report");
+        int previousYear = Utility.getCurrentDateStamp().minusYears(1).getYear();
+        ArrayList<Transaction> previousYearList = new ArrayList<>();
+        for (Transaction t : allTransactions) {
+            if (t.getDate().getYear() == previousYear) {
+                previousYearList.add(t);
+            }
+        }
+        if (previousYearList.isEmpty()) {
+            System.out.println("No transactions found for the previous year.");
+        } else {
+            for (Transaction t : previousYearList) {
+                System.out.println(t);
+            }
+        }
+    }
+
+    // Searches by vendor name and displays report
+    public static void searchByVendorReport(ArrayList<Transaction> allTransactions) {
+        UserServices.printSeparator("Search by Vendor");
+        System.out.print("Enter vendor name to search: ");
+        String vendorSearch = UserServices.getScanner().nextLine().trim().toLowerCase();
+        ArrayList<Transaction> vendorMatches = new ArrayList<>();
+        for (Transaction t : allTransactions) {
+            if (t.getVendor().toLowerCase().contains(vendorSearch)) {
+                vendorMatches.add(t);
+            }
+        }
+        if (vendorMatches.isEmpty()) {
+            System.out.println("No transactions found for vendor: " + vendorSearch);
+        } else {
+            for (Transaction t : vendorMatches) {
+                System.out.println(t);
+            }
+        }
     }
 }
