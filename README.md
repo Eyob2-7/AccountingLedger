@@ -82,7 +82,7 @@ This function provides a dynamic way to filter and display transactions based on
 ## Technologies Used
 
 - Java
-- Java Collections (ArrayList)
+- Java Collections (ArrayList, Comparator)
 - LocalDate & LocalTime
 - File I/O
 - Git & GitHub
